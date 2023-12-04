@@ -1,7 +1,6 @@
-import random
-from Lib.UnitsPrepare import *
-from Lib.PlayerClass import PlayerInfo
-from Lib.MainGame import playTheGame
+from UnitsPrepare import *
+from PlayerClass import PlayerInfo
+from MainGame import playTheGame
 
 
 # Example usage
