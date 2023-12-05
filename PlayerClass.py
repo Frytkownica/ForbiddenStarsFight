@@ -1,4 +1,4 @@
-from DiceClass import selectDice
+from DiceClass import *
 from CardsClass import *
 from UnitClass import *
 from UnitsPrepare import selectUnits
@@ -40,6 +40,11 @@ class Player:
             except ValueError:
                 print(f"Invalid input. Enter a number between 1 and {sizeOfHand}: ")
         return selectedCard - 1
+    def addRandomDie(self, amount: int = 1):
+            for _ in range(amount):
+                if len(self.dice) < 8:
+                    self.dice.append(rollDice())
+            self.dice.sort(key=sortDie)
     def recount(self):
         self.bolter = (self.dice.count('Bolter') +
                        sum(cardParameters(self.faction, card).get('Bolter') for card in self.playedCardList) +
@@ -51,6 +56,23 @@ class Player:
                        sum(cardParameters(self.faction, card).get('Morale') for card in self.playedCardList) +
                        sum(unit.morale for unit in self.unitList if not unit.routed))
 
+    def reRollDie(self, whatDie: str, amount: int = 1):
+        for _ in range(amount):
+            if whatDie in self.dice:
+                self.dice.remove(whatDie)
+                self.dice.append(rollDice())
+        self.dice.sort(key=sortDie)
+
+    def reRollAllDie(self):
+        diceCount = len(self.dice)
+        self.dice = []
+        self.addRandomDie(diceCount)
+        self.dice.sort(key=sortDie)
+
+    def addReinforce(self, amount: int = 1):
+        for _ in range(amount):
+            ifSpace = self.unitList[0].space
+            self.unitList.append(Unit(self.faction,0,False,ifSpace))
 
 class PlayerInfo:
     def __init__(self, factionList: List[int], unlockedCardList: List[bool], unitList: List[Unit]):
