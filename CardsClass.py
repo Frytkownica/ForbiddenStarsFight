@@ -1,7 +1,8 @@
 import random
 from PlayerClass import Player
+from DiceClass import *
 from typing import List
-
+from MainGame import displayInfo
 
 def selectCards(unlockedcardList: List[bool]):
     if len(unlockedcardList) != 28:
@@ -92,7 +93,7 @@ def cardParameters(faction: int, cardNumber: int):
     return mapping.get(faction, {}).get(cardNumber, {})
 
 
-def cardAction(round: int, player: Player, enemy: Player, cardNumber: int):
+def cardAction(gameRound: int, player: Player, enemy: Player, cardNumber: int):
     match player.faction:
         case 0:
             match cardNumber:
@@ -101,22 +102,22 @@ def cardAction(round: int, player: Player, enemy: Player, cardNumber: int):
                     enemy.playedCardList.append(enemy.playedCard)
                     enemy.turnedCard = []
                     enemy.recount()
-                    if (chooseTokens(round, player, enemy, 2, 2) == 1):
+                    if (chooseTokens(gameRound, player, enemy, 2, 2) == 1):
                         player.bolterTokens+=2
                     else:
                         player.shieldTokens+=2
                 # Faith in the Emperor
                 case 1:
-                    addRandomDie(player.dice)
+                    player.addRandomDie()
                 # Ambush
                 case 2:
                     player.bolterTokens += 2
                 # Fury of the Ultramar
                 case 3:
-                    reRollDie(enemy.dice, 'Shield')
+                    enemy.reRollDie('Shield')
                     enemy.recount()
-                    if (chooseReroll(round,player, enemy, 'Shield') == 1):
-                        reRollDie(player.dice, 'Shield')
+                    if (chooseReroll(gameRound,player, enemy, 'Shield') == 1):
+                        player.reRollDie('Shield')
                 # Blessed Power armour
                 case 4:
                     player.shieldTokens += 2
@@ -132,13 +133,13 @@ def cardAction(round: int, player: Player, enemy: Player, cardNumber: int):
                 case 7:
                     for _ in player.dice.count('Morale'):
                         player.recount()
-                        if (chooseTokens(round, player, enemy, 1, 1) == 1):
+                        if (chooseTokens(gameRound, player, enemy, 1, 1) == 1):
                             player.bolterTokens += 1
                         else:
                             player.shieldTokens += 1
                 # Drop Pod assault
                 case 8:
-                    addRandomDie(player.dice)
+                    player.addRandomDie()
                 # Show no fear
                 case 9:
                     #toDo Add blocking routing in player parameters
@@ -146,47 +147,74 @@ def cardAction(round: int, player: Player, enemy: Player, cardNumber: int):
                 # Break the line
                 case 10:
                     amount = player.dice.count('Morale')
-                    for
+                    for _ in range(amount):
+                        player.recount()()
+                        if (chooseSpend(gameRound, player, enemy, 'Morale') == 1):
+                            chooseGainDie(player,1,1)
+                        else:
+                            break
                 # Armoured advance
                 case 11:
+                    player.addRandomDie()
                 # Emperor's glory
                 case 12:
+                    player.addRandomDie(2)
                 # Emperor's might
                 case 13:
+                    player.addRandomDie(2)
         case 1:
             match cardNumber:
                 # Slugga Boyz
                 case 0:
+                    player.reRollDie('Morale', player.dice.count('Morale'))
+                    enemy.reRollDie('Morale', enemy.dice.count('Morale'))
                 # Shoota Boyz
                 case 1:
+                    player.reRollDie('Shield', player.dice.count('Shield'))
                 # 'Ard Boyz
                 case 2:
+                    player.reRollDie('Bolter', player.dice.count('Bolter'))
                 # Gretchin
                 case 3:
+                    player.shieldTokens += 1
+                    player.bolterTokens += 1
+                    chooseEnemyReroll(gameRound,player,enemy)
                 # Mek Boyz
                 case 4:
+                    player.addRandomDie()
                 # Biker Nobz
                 case 5:
+                    enemy.reRollDie('Bolter', enemy.dice.count('Bolter'))
                 # Sea of green
                 case 6:
+                    player.addReinforce()
                 # Waaagh!!!!
                 case 7:
+                    chooseRally(gameRound,player,enemy)
                 # Mega Nobz
                 case 8:
+                    enemy.reRollDie('Shield', enemy.dice.count('Shield'))
                 # Rokkit wagon
                 case 9:
+                    pass
                 # Weirdboyz
                 case 10:
+                    player.reRollAllDie()
+                    enemy.reRollAllDie()
                 # Party wagon
                 case 11:
+                    player.addReinforce()
                 # Snapper Gargant
                 case 12:
+                    pass
                 # Smasher Gargant
                 case 13:
+                    pass
 
 
-def chooseTokens(round, player, enemy, bolterTokens, shieldTokens):
-    displayInfo(round, player, enemy)
+
+def chooseTokens(gameRound, player, enemy, bolterTokens, shieldTokens):
+    displayInfo(gameRound, player, enemy)
     while True:
         try:
             selectedToken = int(input(f"Choose between {bolterTokens} and {shieldTokens}: "))
@@ -198,18 +226,61 @@ def chooseTokens(round, player, enemy, bolterTokens, shieldTokens):
             print(f"Invalid input. Choose between {bolterTokens} and {shieldTokens}:  ")
     return selectedToken
 
-def chooseReroll(round, player, enemy, whatDie):
-    displayInfo(round, player, enemy)
+def chooseReroll(gameRound:int, player:Player, enemy:Player, whatDie:str):
+    displayInfo(gameRound, player, enemy)
     while True:
         try:
-            selectedToken = int(input(f"Do you reroll {whatDie} or Not: "))
-            if 1 <= selectedToken <= 2:
+            rerollChoice = int(input(f"Do you reroll {whatDie} or Not: "))
+            if 1 <= rerollChoice <= 2:
                 break
             else:
                 print("Number out of range. Please try again.")
         except ValueError:
             print(f"Invalid input. Do you reroll {whatDie} or Not:  ")
-    return selectedToken
+    return rerollChoice
 
-def chooseSpend()
-    #ToDo
+def chooseEnemyReroll(gameRound:int, player:Player, enemy:Player):
+    displayInfo(gameRound, player, enemy)
+    while True:
+        try:
+            rerollChoice = int(input("What enemy die reroll: Bolter Shield or Morale?"))
+            if 1 <= rerollChoice <= 3:
+                break
+            else:
+                print("Number out of range. Please try again.")
+        except ValueError:
+            print(f"Invalid input. What enemy die reroll: Bolter Shield or Morale?")
+    enemy.reRollDie(dieNumberToName(rerollChoice))
+
+def chooseRally(gameRound:int, player:Player, enemy:Player):
+    routedUnitList = [routedUnit for routedUnit in player.unitList if routedUnit.routed == True]
+    if len(routedUnitList) > 1:
+        routedUnitCommandLevel = list(set(singleUnit.cl for singleUnit in routedUnitList))
+        routedUnitString = ", ".join(str(singleUnit) for singleUnit in routedUnitCommandLevel)
+        displayInfo(gameRound, player, enemy)
+        while True:
+            try:
+                unitToRally = int(input(f"What unit to rally: {routedUnitString}"))
+                if 1 <= unitToRally <= len(routedUnitCommandLevel):
+                    break
+                else:
+                    print("Number out of range. Please try again.")
+            except ValueError:
+                print(f"Invalid input. What unit to rally: {routedUnitString}?")
+        for singleUnit in player.unitList:
+            if singleUnit.cl == routedUnitCommandLevel[unitToRally-1]:
+                singleUnit.routed = False
+                break
+    elif len(routedUnitList) == 1:
+        for singleUnit in player.unitList:
+            if singleUnit.cl == routedUnitList[0].cl:
+                singleUnit.routed = False
+                break
+
+def chooseSpend():
+    pass
+    #ToDo chooses if loose something or not
+
+def chooseGainDie(player, bolterDies:int = 0, shieldDies:int = 0, moraleDies:int = 0):
+    pass
+    #ToDo let player choose what die to gain
