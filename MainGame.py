@@ -1,45 +1,29 @@
 from PlayerClass import PlayerInfo
+from CardsClass import cardAction
 
 
 def playTheGame(playerInfo: PlayerInfo):
-    def askWhatToDo(player):
-        sizeOfHand = len(player.handCards)
-        while True:
-            try:
-                selectedCard = int(input(f"Enter a number between 1 and {sizeOfHand}: "))
-                if 1 <= selectedCard <= sizeOfHand:
-                    break
-                else:
-                    print("Number out of range. Please try again.")
-            except ValueError:
-                print(f"Invalid input. Enter a number between 1 and {sizeOfHand}: ")
-        return selectedCard - 1
 
-    def playCard(player, playedCard):
-        player.playedCard.append(player.handCards[playedCard])
-        player.handCards.pop(playedCard)
-
-    def resolveCard(player, playedCard, enemy):
-        player.playedCardList.append(player.playedCard)
-        player.turnedCard=[]
-        player.recount
-        cardAction(player, enemy, playedCard)
-        player.recount
+    def resolveCard(round, activePlayer, playedCard, secondPlayer):
+        activePlayer.turnCard()
+        activePlayer.recount()
+        cardAction(round, activePlayer, secondPlayer, playedCard)
+        activePlayer.recount()
 
     def roundOperations(round, player, enemy):
         displayInfo(round, player, enemy)
-        playerCard = askWhatToDo(player)
+        playerCard = player.askWhatToDo()
         displayInfo(round, enemy, player)
-        enemyCard = askWhatToDo(enemy)
-        playCard(player, playerCard)
-        playCard(enemy, enemyCard)
+        enemyCard = enemy.askWhatToDo()
+        player.playCard(playerCard)
+        enemy.playCard(enemyCard)
         resolveCard(round, player, playerCard, enemy)
         resolveCard(round, enemy, enemyCard, player)
 
-    for round in range(0, 3):
-        roundOperations(round, playerInfo.player1, playerInfo.player2)
+    for gameRound in range(0, 3):
+        roundOperations(gameRound, playerInfo.player1, playerInfo.player2)
 
-
+# Placebo function that will trow the data to the agent
 def displayInfo(round, player, enemy):
     print("Round ", round)
     print("Hand ", player.handCards)

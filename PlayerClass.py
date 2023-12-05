@@ -3,8 +3,10 @@ from CardsClass import *
 from UnitClass import *
 from UnitsPrepare import selectUnits
 from typing import List
+
+
 class Player:
-    def __init__(self, cards:List[int], unitList:List[Unit], dice:List[str]):
+    def __init__(self, cards: List[List[int]], unitList: List[Unit], dice: List[str]):
         self.faction = unitList[0].faction
         self.handCards = cards[0]
         self.restCards = cards[1]
@@ -12,22 +14,42 @@ class Player:
         self.dice = dice
         self.playedCardList = []
         self.playedCard = []
+        self.turnedCard = None
         self.bolterTokens = 0
         self.shieldTokens = 0
         self.bolter = dice.count('Bolter')
         self.shield = dice.count('Shield')
         self.morale = dice.count('Morale') + sum(unit.morale for unit in unitList if not unit.routed)
 
+    def playCard(self, playedCard):
+        self.turnedCard = self.handCards[playedCard]
+        self.handCards.pop(playedCard)
+    def turnCard(self):
+        self.playedCardList.append(self.turnedCard)
+        self.turnedCard = None
+
+    def askWhatToPlay(self):
+        sizeOfHand = len(self.handCards)
+        while True:
+            try:
+                selectedCard = int(input(f"Enter a number between 1 and {sizeOfHand}: "))
+                if 1 <= selectedCard <= sizeOfHand:
+                    break
+                else:
+                    print("Number out of range. Please try again.")
+            except ValueError:
+                print(f"Invalid input. Enter a number between 1 and {sizeOfHand}: ")
+        return selectedCard - 1
     def recount(self):
-        self.bolter = (dice.count('Bolter') +
+        self.bolter = (self.dice.count('Bolter') +
                        sum(cardParameters(self.faction, card).get('Bolter') for card in self.playedCardList) +
                        self.bolterTokens)
-        self.shield = (dice.count('Shield') +
+        self.shield = (self.dice.count('Shield') +
                        sum(cardParameters(self.faction, card).get('Shield') for card in self.playedCardList) +
                        self.shieldTokens)
-        self.morale = (dice.count('Morale') +
+        self.morale = (self.dice.count('Morale') +
                        sum(cardParameters(self.faction, card).get('Morale') for card in self.playedCardList) +
-                       sum(unit.morale for unit in unitList if not unit.routed))
+                       sum(unit.morale for unit in self.unitList if not unit.routed))
 
 
 class PlayerInfo:
