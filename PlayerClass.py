@@ -1,6 +1,6 @@
 from DiceClass import *
-from CardsClass import *
 from UnitClass import *
+from CardsIcons import cardParameters
 from UnitsPrepare import selectUnits
 from typing import List
 
@@ -14,7 +14,7 @@ class Player:
         self.dice = dice
         self.playedCardList = []
         self.playedCard = []
-        self.turnedCard = None
+        self.cardPlayedThisRound = None
         self.bolterTokens = 0
         self.shieldTokens = 0
         self.bolter = dice.count('Bolter')
@@ -29,17 +29,20 @@ class Player:
         self.turnedCard = None
 
     def askWhatToPlay(self):
-        sizeOfHand = len(self.handCards)
+        sizeOfHand = len(self.handCards)-1
         while True:
             try:
-                selectedCard = int(input(f"Enter a number between 1 and {sizeOfHand}: "))
-                if 1 <= selectedCard <= sizeOfHand:
+                selectedCard = int(input(f"Enter a number between 0 and {sizeOfHand}: "))
+                if 0 <= selectedCard <= sizeOfHand:
                     break
                 else:
                     print("Number out of range. Please try again.")
             except ValueError:
                 print(f"Invalid input. Enter a number between 1 and {sizeOfHand}: ")
-        return selectedCard - 1
+        self.cardPlayedThisRound = self.handCards[selectedCard]
+        self.handCards.pop(selectedCard)
+        return self.cardPlayedThisRound
+
     def addRandomDie(self, amount: int = 1):
             for _ in range(amount):
                 if len(self.dice) < 8:
@@ -76,8 +79,30 @@ class Player:
 
 class PlayerInfo:
     def __init__(self, factionList: List[int], unlockedCardList: List[bool], unitList: List[Unit]):
-        player1CardList, player2CardList = selectCards(unlockedCardList)
+        player1CardList, player2CardList = self.selectCards(unlockedCardList)
         player1UnitList, player2UnitList = selectUnits(factionList, unitList)
         player1Dice, player2Dice = selectDice(player1UnitList, player2UnitList)
         self.player1 = Player(player1CardList, player1UnitList, player1Dice)
         self.player2 = Player(player2CardList, player2UnitList, player2Dice)
+
+    def selectCards(self, unlockedcardList: List[bool]):
+        if len(unlockedcardList) != 28:
+            raise ValueError("unlockedcardList must have 28 elements.")
+
+        def selectRange(startIndex: int):
+            return [unlockedcardList[element] for element in range(startIndex, startIndex + 14)]
+
+        def selectPlayerCards(rangedList: List[int]):
+            availableTypes = [cardNumber for cardNumber in range(14) if rangedList[cardNumber]]
+            # Making doublets
+            selectionPool = [cardNumber for cardNumber in availableTypes for _ in range(2)]
+            # Shuffle Deck
+            random.shuffle(selectionPool)
+            selectedCards = selectionPool[0:5]
+            remainingCards = selectionPool[5:10]
+            return selectedCards, remainingCards
+
+        player1Cards = selectPlayerCards(selectRange(0))
+        player2Cards = selectPlayerCards(selectRange(14))
+
+        return player1Cards, player2Cards
