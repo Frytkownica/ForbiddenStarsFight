@@ -1,24 +1,23 @@
-from PlayerClass import PlayerInfo
-from CardsClass import cardAction
+from PlayerClass import *
+from CardsActions import cardAction
+from InformationHandling import displayInfo
 
 
 def playTheGame(playerInfo: PlayerInfo):
 
-    def resolveCard(round, activePlayer, playedCard, secondPlayer):
+    def resolveCard(round : int, activePlayer : Player, enemy : Player, playedCard : int):
         activePlayer.turnCard()
         activePlayer.recount()
-        cardAction(round, activePlayer, secondPlayer, playedCard)
+        cardAction(round, activePlayer, enemy, playedCard)
         activePlayer.recount()
 
-    def roundOperations(round, player, enemy):
-        displayInfo(round, player, enemy)
-        playerCard = player.askWhatToDo()
-        displayInfo(round, enemy, player)
-        enemyCard = enemy.askWhatToDo()
-        player.playCard(playerCard)
-        enemy.playCard(enemyCard)
-        resolveCard(round, player, playerCard, enemy)
-        resolveCard(round, enemy, enemyCard, player)
+    def roundOperations(round, attacker, defender):
+        displayInfo(round, attacker, defender)
+        attackerPlayedCard = attacker.askWhatToPlay()
+        displayInfo(round, defender, attacker)
+        defenderPlayedCard = defender.askWhatToPlay()
+        resolveCard(round, attacker, defender, attackerPlayedCard)
+        resolveCard(round, defender, attacker, defenderPlayedCard)
 
     for gameRound in range(0, 3):
         roundOperations(gameRound, playerInfo.player1, playerInfo.player2)

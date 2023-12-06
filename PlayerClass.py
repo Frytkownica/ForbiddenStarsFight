@@ -21,12 +21,11 @@ class Player:
         self.shield = dice.count('Shield')
         self.morale = dice.count('Morale') + sum(unit.morale for unit in unitList if not unit.routed)
 
-    def playCard(self, playedCard):
-        self.turnedCard = self.handCards[playedCard]
-        self.handCards.pop(playedCard)
     def turnCard(self):
-        self.playedCardList.append(self.turnedCard)
-        self.turnedCard = None
+        if self.cardPlayedThisRound is not None:
+            self.playedCardList.append(self.cardPlayedThisRound)
+            self.cardPlayedThisRound = None
+        self.recount()
 
     def askWhatToPlay(self):
         sizeOfHand = len(self.handCards)-1
