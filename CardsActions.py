@@ -12,7 +12,7 @@ def cardAction(gameRound: int, activePlayer: Player, enemy: Player, cardNumber: 
                 # Reconnaissance
                 case 0:
                     enemy.turnCard()
-                    if (chooseTokens(gameRound, activePlayer, enemy, 2, 2) == 1):
+                    if (chooseTokens(gameRound, activePlayer, enemy, 2, 2) == 0):
                         activePlayer.bolterTokens += 2
                     else:
                         activePlayer.shieldTokens += 2
@@ -26,7 +26,7 @@ def cardAction(gameRound: int, activePlayer: Player, enemy: Player, cardNumber: 
                 case 3:
                     enemy.reRollDie('Shield')
                     enemy.recount()
-                    if (chooseReroll(gameRound, activePlayer, enemy, 'Shield') == 1):
+                    if (chooseReroll(gameRound, activePlayer, enemy, 'Shield') == 0):
                         activePlayer.reRollDie('Shield')
                 # Blessed Power armour
                 case 4:
@@ -43,7 +43,7 @@ def cardAction(gameRound: int, activePlayer: Player, enemy: Player, cardNumber: 
                 case 7:
                     for _ in activePlayer.dice.count('Morale'):
                         activePlayer.recount()
-                        if (chooseTokens(gameRound, activePlayer, enemy, 1, 1) == 1):
+                        if (chooseTokens(gameRound, activePlayer, enemy, 1, 1) == 0):
                             activePlayer.bolterTokens += 1
                         else:
                             activePlayer.shieldTokens += 1
@@ -59,7 +59,7 @@ def cardAction(gameRound: int, activePlayer: Player, enemy: Player, cardNumber: 
                     amount = activePlayer.dice.count('Morale')
                     for _ in range(amount):
                         activePlayer.recount()()
-                        if (chooseSpend(gameRound, activePlayer, enemy, 'Morale') == 1):
+                        if (chooseSpend(gameRound, activePlayer, enemy, 'Morale') == 0):
                             chooseGainDie(activePlayer, 1, 1)
                         else:
                             break
